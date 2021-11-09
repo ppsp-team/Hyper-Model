@@ -86,6 +86,9 @@ def cohen_d(x, y):
                       (ny - 1) * np.std(y, ddof=1) ** 2) / dof)
     return ((np.mean(x) - np.mean(y)) / poolsd)
 
+import matplotlib.patches as mpatches
+red= mpatches.Patch(color='red', label='High Coupling')
+blue=  mpatches.Patch(color='blue', label='Low Coupling')
 
 print(simu(coupling=1., modulation=0.1, noise=0.1))
 
@@ -99,9 +102,12 @@ for modulation in np.linspace(0,1,5):
     print(modulation, st.kruskal(np.array(high_c), np.array(low_c)), cohen_d(np.array(high_c), np.array(low_c)))
     plt.figure()
     plt.subplot(2,1,1); sns.violinplot(np.array(low_c), color='b')
+    plt.legend(handles=[red, blue], bbox_to_anchor =(0.75, 1.25), ncol = 2)
     plt.xlim([0, 1])
+    plt.xlabel('PLV')
     plt.subplot(2,1,2); sns.violinplot(np.array(high_c), color='r')
     plt.xlim([0, 1])
+    plt.xlabel('PLV')
     plt.show()
 
 # KruskalResult(statistic=555.9697458368455, pvalue=6.329078100701732e-123)
