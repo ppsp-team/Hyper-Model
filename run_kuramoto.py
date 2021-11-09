@@ -4,11 +4,11 @@
 # title           : run_kuramoto.py
 # description     : Demonstrates the link between crossfrequency coupling & IBS
 # author          : Guillaume Dumas
-# date            : 2019-03-09
+# date            : 2021-11-09
 # version         : 1
 # usage           : python run_kuramoto.py
-# notes           : require kuramoto.py
-# python_version  : 3.7
+# notes           : require kuramoto.py (version by D. Laszuk)
+# python_version  : 3.7-3.9
 # ==============================================================================
 
 import numpy as np
@@ -18,11 +18,16 @@ from kuramoto import Kuramoto
 import scipy.stats as st
 from tqdm import tqdm
 import seaborn as sns
+import matplotlib.pyplot as plt
 
+plt.ion()
 
-def simu(coupling=0.1, modulation=0.1, noise=0.1):
-    freq_sd = 1
-    freq_mean = 10
+def simu(coupling=0.1, modulation=0.1, noise=0.1, plot=False):
+    low_freq_sd = 1
+    low_freq_mean = 10
+
+    high_freq_mean = 40
+
     # Defining time array
     t0, t1, dt = 0, 40, 0.01
     T = np.arange(t0, t1, dt)
@@ -30,7 +35,7 @@ def simu(coupling=0.1, modulation=0.1, noise=0.1):
     # Y0, W, K are initial phase, intrinsic freq and
     # coupling K matrix respectively
     Y0 = np.random.rand(2)*2*np.pi
-    W = np.array(np.random.randn(2)*freq_sd + freq_mean)  # [28, 19, 11]
+    W = np.array(np.random.randn(2) * low_freq_sd + low_freq_mean)
 
     W12 = coupling
     W21 = coupling
@@ -52,18 +57,19 @@ def simu(coupling=0.1, modulation=0.1, noise=0.1):
     phaseDynamics = np.diff(odePhi)/dt
 
     low_fb = np.sin(odePhi)
-    high_fb = np.vstack((np.sin(T * 2 * np.pi * 40.) * ((1-modulation) + (modulation * low_fb[0])) + np.random.randn(4000)*noise,
-                        np.sin(T * 2 * np.pi * 40.) * ((1-modulation) + (modulation * low_fb[1])) + np.random.randn(4000)*noise))
+    high_fb = np.vstack((np.sin(T * 2 * np.pi * high_freq_mean) * ((1-modulation) + (modulation * low_fb[0])) + np.random.randn(4000)*noise,
+                        np.sin(T * 2 * np.pi * high_freq_mean) * ((1-modulation) + (modulation * low_fb[1])) + np.random.randn(4000)*noise))
 
-    # # Plotting response
-    # nOsc = len(W)
-    # for osc in range(nOsc):
-    #     plt.subplot(nOsc, 1, 1+osc)
-    #     plt.plot(T, low_fb[osc], alpha=0.3)
-    #     plt.plot(T, high_fb[osc], alpha=0.3)  # phaseDynamics[osc])
-    #     plt.ylabel("$\dot\phi_{%i}$" %(osc+1))
-    #     plt.xlim([30, 40])
-    # plt.show()
+    # Plotting response
+    if plot:
+        nOsc = len(W)
+        for osc in range(nOsc):
+            plt.subplot(nOsc, 1, 1+osc)
+            plt.plot(T, low_fb[osc], alpha=0.3)
+            plt.plot(T, high_fb[osc], alpha=0.3)  # phaseDynamics[osc])
+            plt.ylabel("$\dot\phi_{%i}$" %(osc+1))
+            plt.xlim([30, 40])
+        plt.show()
 
     high_phase = np.angle(hilbert(high_fb))
     return np.abs(np.mean(np.exp(1j * (high_phase[1] - high_phase[0]))))
