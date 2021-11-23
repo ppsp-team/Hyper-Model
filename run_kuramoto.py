@@ -58,7 +58,7 @@ def simu(coupling=0.1, modulation=0.1, noise=0.1, plot=False):
 
     low_fb = np.sin(odePhi)
     high_fb = np.vstack((np.sin(T * 2 * np.pi * high_freq_mean) * ((1-modulation) + (modulation * low_fb[0])) + np.random.randn(4000)*noise,
-                        np.sin(T * 2 * np.pi * high_freq_mean) * ((1-modulation) + (modulation * low_fb[1])) + np.random.randn(4000)*noise))
+                         np.sin(T * 2 * np.pi * high_freq_mean) * ((1-modulation) + (modulation * low_fb[1])) + np.random.randn(4000)*noise))
 
     # Plotting response
     if plot:
@@ -111,3 +111,40 @@ for modulation in np.linspace(0,1,5):
     plt.show()
 
 # KruskalResult(statistic=555.9697458368455, pvalue=6.329078100701732e-123)
+
+
+# X-axis being the inter-brain coupling in theta, Y-axis being the intra-brain cross-frequency coupling between theta and gamma, color would be the gamma inter-brain coupling
+
+# Parameters
+n_coupling = 5
+n_modulation = 9
+n_sims = 10
+noise = 1.
+
+# Init values ranges & grid
+couplings = np.linspace(0, 1, n_coupling)
+modulations = np.linspace(0, 1, n_modulation)
+coupling_grid, modulation_grid = np.meshgrid(couplings, modulations, sparse=False, indexing='xy')
+plv_grid = np.zeros(coupling_grid.shape) * np.nan
+
+# Run simulations
+for i_coupling in range(n_coupling):
+    for i_modulation in range(n_modulation):
+        # treat xv[j,i], yv[j,i]
+        coupling = coupling_grid[i_modulation, i_coupling]
+        modulation = modulation_grid[i_modulation, i_coupling]
+        sims = [simu(coupling=coupling, modulation=modulation, noise=noise) for sim in range(n_sims)]
+        plv_grid[i_modulation, i_coupling] = np.mean(np.array(sims))
+
+# Plot results
+ax = plt.subplot()
+plt.imshow(plv_grid, interpolation='nearest', vmin=0, vmax=1)
+ax.set_xticks(range(n_coupling))
+ax.set_yticks(range(n_modulation))
+ax.set_xticklabels(couplings)
+ax.set_yticklabels(modulations)
+plt.xlabel("Coupling in the theta band")
+plt.ylabel("Modulation of gamma by theta")
+plt.gca().invert_yaxis()
+plt.colorbar(label='PLV')
+plt.show()
