@@ -11,6 +11,7 @@
 # python_version  : 3.7-3.9
 # ==============================================================================
 
+from matplotlib.colorbar import Colorbar
 import numpy as np
 from scipy.signal import hilbert
 import pylab as plt
@@ -19,6 +20,9 @@ import scipy.stats as st
 from tqdm import tqdm
 import seaborn as sns
 import matplotlib.pyplot as plt
+import matplotlib
+plt.switch_backend('Qt5Agg') 
+
 
 plt.ion()
 
@@ -126,6 +130,7 @@ couplings = np.linspace(0, 1, n_coupling)
 modulations = np.linspace(0, 1, n_modulation)
 coupling_grid, modulation_grid = np.meshgrid(couplings, modulations, sparse=False, indexing='xy')
 plv_grid = np.zeros(coupling_grid.shape) * np.nan
+plv_std = np.zeros(coupling_grid.shape) * np.nan
 
 # Run simulations
 for i_coupling in range(n_coupling):
@@ -135,16 +140,54 @@ for i_coupling in range(n_coupling):
         modulation = modulation_grid[i_modulation, i_coupling]
         sims = [simu(coupling=coupling, modulation=modulation, noise=noise) for sim in range(n_sims)]
         plv_grid[i_modulation, i_coupling] = np.mean(np.array(sims))
+        plv_std[i_modulation, i_coupling] = np.std(np.array(sims))
 
-# Plot results
-ax = plt.subplot()
-plt.imshow(plv_grid, interpolation='nearest', vmin=0, vmax=1)
-ax.set_xticks(range(n_coupling))
-ax.set_yticks(range(n_modulation))
-ax.set_xticklabels(couplings)
-ax.set_yticklabels(modulations)
-plt.xlabel("Coupling in the theta band")
-plt.ylabel("Modulation of gamma by theta")
+# Compare low and high coupling
+low_coupling = plv_grid[:,0]
+high_coupling = plv_grid[:,4]
+diff_plv = high_coupling - low_coupling
+
+low_coupling_std = plv_std[:,0]
+low_coupling_var = np.square(low_coupling_std)
+
+high_coupling_std = plv_std[:,4]
+high_coupling_var = np.square(high_coupling_std)
+
+common_std = np.sqrt(low_coupling_var+high_coupling_var)
+
+##### Figure ######
+import matplotlib.gridspec as gridspec
+from matplotlib.colorbar import Colorbar
+
+fig = plt.figure()
+plt.rcParams['font.size'] = '14'
+gs = gridspec.GridSpec(ncols=2, nrows=2, height_ratios = [0.05, 1], width_ratios = [1.5,0.5]) 
+gs.update(left=0.15, right = 0.95, bottom = 0.08, top = 0.90, wspace = 0.013, hspace = 0.07)
+
+# Heatmap
+ax1 = plt.subplot(gs[1,0])
+plt1 = plt.imshow(plv_grid, interpolation='nearest', vmin=0, vmax=0.4,aspect='auto')
+plt.xlabel('$Coupling\ in\ the\ θ\ band$',fontsize=18)
+plt.ylabel('$Modulation\ of\ γ\ by\ θ$',fontsize=18)
+ax1.set_xticks(range(n_coupling))
+ax1.set_yticks(range(n_modulation))
+ax1.set_xticklabels(couplings)
+ax1.set_yticklabels(modulations)
 plt.gca().invert_yaxis()
-plt.colorbar(label='PLV')
-plt.show()
+
+# Colorbar
+cbax = plt.subplot(gs[0,0])
+cb = Colorbar(ax=cbax, mappable = plt1, orientation='horizontal', ticklocation = 'top')
+cb.set_label('PLV', labelpad = 10,fontsize=18)
+
+# Line plot
+ax2 = plt.subplot(gs[1,1])
+y = range(diff_plv.shape[0])
+plt.plot(diff_plv, y)
+plt.fill_betweenx(y, diff_plv-common_std, diff_plv+common_std,alpha=.1)
+ax2.set_xticks(range(diff_plv))
+plt.xlabel('$ΔPLV_{High - Low}$',fontsize=18)
+plt.axvline(x=0, color='k', ls='--')
+ax2.set_yticks([])
+
+fig.show()
