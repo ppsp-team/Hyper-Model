@@ -28,7 +28,7 @@ plt.ion()
 
 def simu(coupling=0.1, modulation=0.1, noise=0.1, plot=False):
     low_freq_sd = 1
-    low_freq_mean = 10
+    low_freq_mean = 6
 
     high_freq_mean = 40
 
