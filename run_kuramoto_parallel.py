@@ -62,11 +62,10 @@ def simu(coupling=0.1, modulation=0.1, noise=0.1):
     high_phase = np.angle(hilbert(high_fb))
     return np.abs(np.mean(np.exp(1j * (high_phase[1] - high_phase[0]))))
 
-
 # Simulation Parameters
 n_coupling = 11
 n_modulation = 11
-n_sims = 5000
+n_sims = 100
 noise = 0.7
 
 # Parallel Processing
