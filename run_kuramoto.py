@@ -3,13 +3,14 @@
 # ==============================================================================
 # title           : run_kuramoto.py
 # description     : Demonstrates the link between crossfrequency coupling & IBS
-# author          : Guillaume Dumas
-# date            : 2021-11-09
-# version         : 1
+# author          : Guillaume Dumas, Quentin Moreau
+# date            : 2022-04-07
+# version         : 2
 # usage           : python run_kuramoto.py
 # notes           : require kuramoto.py (version by D. Laszuk)
 # python_version  : 3.7-3.9
 # ==============================================================================
+
 
 from copyreg import pickle
 from matplotlib.colorbar import Colorbar
@@ -143,7 +144,9 @@ for i_coupling in range(n_coupling):
         plv_grid[i_modulation, i_coupling] = np.mean(np.array(sims))
         plv_std[i_modulation, i_coupling] = np.std(np.array(sims))
 
+
 #pickle save
+
 # Compare low and high coupling
 low_coupling = plv_grid[:,0]
 high_coupling = plv_grid[:,4]
@@ -162,7 +165,6 @@ import matplotlib.gridspec as gridspec
 from matplotlib.colorbar import Colorbar
 from matplotlib.ticker import FormatStrFormatter
 
-
 fig = plt.figure()
 plt.rcParams['font.size'] = '14'
 gs = gridspec.GridSpec(ncols=2, nrows=2, height_ratios = [0.05, 1], width_ratios = [1.5,0.5]) 
@@ -170,6 +172,7 @@ gs.update(left=0.15, right = 0.95, bottom = 0.08, top = 0.90, wspace = 0.013, hs
 
 coupling_ticks = np.round(couplings, 3)
 modulation_ticks = np.round(modulations, 3)
+
 # Heatmap
 ax1 = plt.subplot(gs[1,0])
 plt1 = plt.imshow(plv_grid, interpolation='nearest', vmin=0, vmax=0.4,aspect='auto')
@@ -180,7 +183,6 @@ ax1.set_yticks(range(n_modulation))
 ax1.set_xticklabels(coupling_ticks)
 ax1.set_yticklabels(modulation_ticks)
 plt.gca().invert_yaxis()
-
 
 # Colorbar
 cbax = plt.subplot(gs[0,0])
