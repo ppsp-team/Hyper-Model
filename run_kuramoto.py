@@ -11,6 +11,7 @@
 # python_version  : 3.7-3.9
 # ==============================================================================
 
+from copyreg import pickle
 from matplotlib.colorbar import Colorbar
 import numpy as np
 from scipy.signal import hilbert
@@ -120,10 +121,10 @@ for modulation in np.linspace(0,1,5):
 # X-axis being the inter-brain coupling in theta, Y-axis being the intra-brain cross-frequency coupling between theta and gamma, color would be the gamma inter-brain coupling
 
 # Parameters
-n_coupling = 5
-n_modulation = 9
-n_sims = 10
-noise = 1.
+n_coupling = 11
+n_modulation = 11
+n_sims = 3
+noise = 0
 
 # Init values ranges & grid
 couplings = np.linspace(0, 1, n_coupling)
@@ -138,10 +139,11 @@ for i_coupling in range(n_coupling):
         # treat xv[j,i], yv[j,i]
         coupling = coupling_grid[i_modulation, i_coupling]
         modulation = modulation_grid[i_modulation, i_coupling]
-        sims = [simu(coupling=coupling, modulation=modulation, noise=noise) for sim in range(n_sims)]
+        sims = [simu(coupling=coupling, modulation=modulation, noise=noise, plot = True) for sim in range(n_sims)]
         plv_grid[i_modulation, i_coupling] = np.mean(np.array(sims))
         plv_std[i_modulation, i_coupling] = np.std(np.array(sims))
 
+#pickle save
 # Compare low and high coupling
 low_coupling = plv_grid[:,0]
 high_coupling = plv_grid[:,4]
@@ -158,12 +160,16 @@ common_std = np.sqrt(low_coupling_var+high_coupling_var)
 ##### Figure ######
 import matplotlib.gridspec as gridspec
 from matplotlib.colorbar import Colorbar
+from matplotlib.ticker import FormatStrFormatter
+
 
 fig = plt.figure()
 plt.rcParams['font.size'] = '14'
 gs = gridspec.GridSpec(ncols=2, nrows=2, height_ratios = [0.05, 1], width_ratios = [1.5,0.5]) 
 gs.update(left=0.15, right = 0.95, bottom = 0.08, top = 0.90, wspace = 0.013, hspace = 0.07)
 
+coupling_ticks = np.round(couplings, 3)
+modulation_ticks = np.round(modulations, 3)
 # Heatmap
 ax1 = plt.subplot(gs[1,0])
 plt1 = plt.imshow(plv_grid, interpolation='nearest', vmin=0, vmax=0.4,aspect='auto')
@@ -171,9 +177,10 @@ plt.xlabel('$Coupling\ in\ the\ θ\ band$',fontsize=18)
 plt.ylabel('$Modulation\ of\ γ\ by\ θ$',fontsize=18)
 ax1.set_xticks(range(n_coupling))
 ax1.set_yticks(range(n_modulation))
-ax1.set_xticklabels(couplings)
-ax1.set_yticklabels(modulations)
+ax1.set_xticklabels(coupling_ticks)
+ax1.set_yticklabels(modulation_ticks)
 plt.gca().invert_yaxis()
+
 
 # Colorbar
 cbax = plt.subplot(gs[0,0])
@@ -191,3 +198,4 @@ plt.axvline(x=0, color='k', ls='--')
 ax2.set_yticks([])
 
 fig.show()
+#plt.savefig()

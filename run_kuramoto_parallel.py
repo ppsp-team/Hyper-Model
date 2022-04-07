@@ -2,7 +2,7 @@
 # coding=utf-8
 # ==============================================================================
 # title           : run_kuramoto_parallel.py
-# description     : Demonstrates the link between crossfrequency coupling & IBS
+# description     : Demonstrates the link between crossfrequency coupling & IBC
 # author          : Guillaume Dumas, Quentin Moreau
 # date            : 2021-11-09
 # version         : 1
