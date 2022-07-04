@@ -1,5 +1,5 @@
 # Hyper-Model
-Toy model to investigate gamma hyper-PLV with cross-frequency coupling
+Model to investigate gamma hyper-PLV with cross-frequency coupling
 
 
 ## Getting started
