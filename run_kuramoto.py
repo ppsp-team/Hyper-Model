@@ -41,7 +41,7 @@ def simu(coupling=0.1, modulation=0.1, noise=0.1, plot=False):
     # Y0, W, K are initial phase, intrinsic freq and
     # coupling K matrix respectively
     Y0 = np.random.rand(2)*2*np.pi
-    W = np.array(np.random.randn(2) * low_freq_sd + low_freq_mean)
+    W = 2 * np.pi * np.array(np.random.randn(2) * low_freq_sd + low_freq_mean)
 
     W12 = coupling
     W21 = coupling
